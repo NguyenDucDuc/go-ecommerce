@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package auth;
+
+// Tùy chỉnh đường dẫn output cho Golang
+option go_package = "./proto/auth";
+
+import "google/protobuf/timestamp.proto";
+import "user.proto";
+
+// Service định nghĩa các hành động mà User Service cung cấp
+service AuthService {
+    // login
+    rpc Login(LoginDto) returns (LoginResponse);
+}
+
+// login user
+message LoginDto {
+    string email = 1;
+    string password = 2;
+}
+// login response 
+message LoginResponse {
+    user.UserResponse user = 1;
+    string access_token = 2;
+    string refresh_token = 3;
+}
+
+

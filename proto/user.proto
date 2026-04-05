@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package user;
+
+// Tùy chỉnh đường dẫn output cho Golang
+option go_package = "./proto/user";
+
+import "google/protobuf/timestamp.proto";
+
+// Service định nghĩa các hành động mà User Service cung cấp
+service UserService {
+  // create user
+  rpc CreateUser(CreateUserDto) returns (UserResponse);
+  // find by email
+  rpc FindByEmail(FindByEmailDto) returns (UserResponse);
+}
+
+// user response
+message UserResponse {
+  string id = 1;
+  string email = 2;
+  string password = 3;
+  string full_name = 4;
+  repeated string roles = 5;
+    string address = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+// input create user
+message CreateUserDto {
+    string email = 1;
+    string password = 2;
+    string full_name = 3;
+    string address = 4;
+}
+
+// find by email dto
+message FindByEmailDto {
+  string email = 1;
+}

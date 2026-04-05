@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package product;
+
+// Tùy chỉnh đường dẫn output cho Golang
+option go_package = "./proto/product";
+
+// import package
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// product service
+service ProductService {
+    // create product
+    rpc CreateProduct(CreateProductDto) returns (ProductResponse);
+}
+
+// product message
+message ProductResponse {
+  string id = 1; // Convert từ hex string của ObjectID
+  string name = 2;
+  string price = 3; // Dùng string để giữ độ chính xác của Decimal128
+  google.protobuf.Struct attributes = 4;
+  repeated string images = 5;
+  bool is_active = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// create product dto
+message CreateProductDto {
+    string name = 1;
+    string price = 2;
+    google.protobuf.Struct attributes = 3;
+    repeated string images = 4;
+    int64 quantity = 5;
+}
+
+
