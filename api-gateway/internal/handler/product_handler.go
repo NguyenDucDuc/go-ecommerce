@@ -42,12 +42,14 @@ func (handler *ProductHandler) Create(c *gin.Context) {
 	if err != nil {
 		util.NewResponseError(c, err)
 	}
+	util.PrettyPrint(res)
 
 	rsp := dto.ProductResponse{
 		ID: res.Id,
 		Name: res.Name,
 		Price: res.Price,
 		Images: res.Images,
+		Attributes: res.Attributes,
 		CreatedAt: res.CreatedAt.AsTime().Format(time.RFC3339),
 		UpdatedAt: res.UpdatedAt.AsTime().Format(time.RFC3339),
 	}

@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	util "go-ecommerce/common/utils"
-	"go-ecommerce/user-service/internal/model"
+	"go-ecommerce/product-service/internal/model"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/v2/bson"

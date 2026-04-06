@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"go-ecommerce/user-service/internal/model"
-	"go-ecommerce/user-service/internal/repository"
+	"go-ecommerce/product-service/internal/model"
+	"go-ecommerce/product-service/internal/repository"
 )
 
 type InventoryService struct {

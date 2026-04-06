@@ -12,7 +12,6 @@ type Product struct {
 	Price      bson.Decimal128 `bson:"price" json:"price"`
 	Attributes bson.M          `bson:"attributes" json:"attributes"` // Flexible schema cực gọn với bson.M
 	Images     []string        `bson:"images" json:"images"`
-	IsActive   bool            `bson:"is_active" json:"is_active"`
 	CreatedAt  time.Time       `bson:"created_at" json:"created_at"`
 	UpdatedAt  time.Time       `bson:"updated_at" json:"updated_at"`
 }

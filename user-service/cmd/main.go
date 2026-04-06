@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"go-ecommerce/common/gen-proto/auth"
-	product "go-ecommerce/common/gen-proto/products"
 	user "go-ecommerce/common/gen-proto/users"
 	"go-ecommerce/common/pkg/jwt"
 	util "go-ecommerce/common/utils"
@@ -29,7 +28,6 @@ func main() {
 	// load module
 	userModule := module.NewUserModule(db)
 	authModule := module.NewAuthModule(db, jwtService)
-	productModule := module.NewProductModule(db)
 
 	// gRPC setup
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", strconv.Itoa(cfg.GrpcPort)))
@@ -40,7 +38,6 @@ func main() {
 	grpcServer := grpc.NewServer()
 	user.RegisterUserServiceServer(grpcServer, userModule.Service)
 	auth.RegisterAuthServiceServer(grpcServer, authModule.AuthService)
-	product.RegisterProductServiceServer(grpcServer, productModule.Service)
 
 	reflection.Register(grpcServer)
 

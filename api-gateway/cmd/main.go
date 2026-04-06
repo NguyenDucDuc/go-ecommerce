@@ -20,20 +20,26 @@ func main() {
 	util.LoadEnv()
 	cfg := config.NewConfig()
 
-	// setup grpc
-	conn, err := grpc.NewClient(cfg.GrpcUserServiceUri, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// setup grpc service
+	userConn, err := grpc.NewClient(cfg.GrpcUserServiceUri, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("❌ Không thể kết nối tới User Service: %v", err)
 	}
-	defer conn.Close()
+	defer userConn.Close()
+
+	productConn, err := grpc.NewClient(cfg.GrpcProductServiceUri, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("❌ Không thể kết nối tới Product Service: %v", err)
+	}
+	defer productConn.Close()
 
 	r := gin.Default()
 	v1 := r.Group("/api/v1")
 
 	// load module
-	userClient := user.NewUserServiceClient(conn)
-	authClient := auth.NewAuthServiceClient(conn)
-	productClient := product.NewProductServiceClient(conn)
+	userClient := user.NewUserServiceClient(userConn)
+	authClient := auth.NewAuthServiceClient(userConn)
+	productClient := product.NewProductServiceClient(productConn)
 
 	userModule := module.NewUserModule(userClient)
 	userModule.Routes.RegisterRoutes(v1)
