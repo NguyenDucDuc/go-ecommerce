@@ -1,4 +1,4 @@
-package config
+package product_config
 
 import util "go-ecommerce/common/utils"
 
@@ -7,9 +7,14 @@ type DatabaseConfig struct {
 	MongoDBName string
 }
 
+type RedisConfig struct {
+	RedisUri string
+}
+
 type ProductServiceConfig struct {
 	DatabaseConfig *DatabaseConfig
 	GrpcPort int
+	RedisConfig RedisConfig
 }
 
 func NewProductServiceConfig() *ProductServiceConfig {
@@ -19,11 +24,17 @@ func NewProductServiceConfig() *ProductServiceConfig {
 	
 	// grpc
 	grpcPort := util.GetIntEnv("GRPC_PRODUCT_SERVICE_PORT", 50002)
+
+	// redis
+	redisUri := util.GetEnv("REDIS_URI", "localhost:6379")
 	return &ProductServiceConfig{
 		DatabaseConfig: &DatabaseConfig{
 			MongoUri: mongoUri,
 			MongoDBName: mongoDBName,
 		},
 		GrpcPort: grpcPort,
+		RedisConfig: RedisConfig{
+			RedisUri: redisUri,
+		},
 	}
 }

@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	product "go-ecommerce/common/gen-proto/products"
+	pkg_redis "go-ecommerce/common/pkg/redis"
 	util "go-ecommerce/common/utils"
-	"go-ecommerce/product-service/internal/config"
+	product_config "go-ecommerce/product-service/internal/config"
 	"go-ecommerce/product-service/internal/db"
 	"go-ecommerce/product-service/internal/module"
+	pkg_product_redis "go-ecommerce/product-service/internal/pkg/redis"
 	"log"
 	"net"
 	"strconv"
@@ -18,11 +20,15 @@ import (
 func main() {
 	util.LoadEnv()
 
-	cfg := config.NewProductServiceConfig()
+	cfg := product_config.NewProductServiceConfig()
+	// mongodb
 	db := db.ConnectDB(cfg.DatabaseConfig.MongoUri, cfg.DatabaseConfig.MongoDBName)
+	// redisdb
+	rdb := pkg_product_redis.ConnectRedis(cfg.RedisConfig)
+	redisService := pkg_redis.NewRedisService(rdb)
 
 	// load module
-	productModule := module.NewProductModule(db)
+	productModule := module.NewProductModule(db, redisService)
 
 	// gRPC setup
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", strconv.Itoa(cfg.GrpcPort)))

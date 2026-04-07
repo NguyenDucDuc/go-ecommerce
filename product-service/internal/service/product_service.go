@@ -2,28 +2,33 @@ package service
 
 import (
 	"context"
+	"fmt"
 	product "go-ecommerce/common/gen-proto/products"
+	pkg_redis "go-ecommerce/common/pkg/redis"
 	util "go-ecommerce/common/utils"
 	"go-ecommerce/product-service/internal/db"
 	"go-ecommerce/product-service/internal/model"
 	"go-ecommerce/product-service/internal/repository"
+	"log"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ProductService struct {
+	txManager        db.TransactionManager
 	repo repository.IProductRepository
 	inventoryService *InventoryService
-	txManager        db.TransactionManager
+	redisService pkg_redis.IRedisService
 	product.UnimplementedProductServiceServer
 }
 
 
-func NewProductService(tx db.TransactionManager, repo repository.IProductRepository, inventoryService *InventoryService) *ProductService{
+func NewProductService(tx db.TransactionManager, repo repository.IProductRepository, inventoryService *InventoryService, rdbService pkg_redis.IRedisService) *ProductService{
 	return &ProductService{
 		repo: repo,
 		inventoryService: inventoryService,
+		redisService: rdbService,
 		txManager: tx,
 	}
 }
@@ -97,6 +102,21 @@ func (productService *ProductService) GetListProduct(ctx context.Context, input 
         input.Limit = 10
     }
 	skip := (input.Page - 1) * input.Limit
+	var itemsCache *product.ListProductResponse
+	cacheKey := fmt.Sprintf("products:list:page:%d:limit:%d:order:%s:sort:%s", 
+		input.Page, 
+		input.Limit, 
+		input.OrderBy, 
+		input.Sort,
+	)
+
+	err := productService.redisService.GetJSON(ctx, cacheKey, &itemsCache)
+	if err == nil {
+		log.Println("Cache product successfully")
+		return itemsCache, nil
+	}
+
+
 	items, total ,err := productService.repo.FindAll(ctx, int(skip), int(input.Limit), input.OrderBy, input.Sort)
 	if err != nil {
 		return &product.ListProductResponse{}, err
@@ -129,5 +149,7 @@ func (productService *ProductService) GetListProduct(ctx context.Context, input 
 		HasNext: int64(input.Page) * int64(input.Limit) < int64(total),
 		HasPrev: int64(input.Limit) > 1,
 	}
+	// cache redis
+	productService.redisService.SetJSON(ctx, cacheKey, rsp, 10 * time.Minute)
 	return rsp, nil
 }
