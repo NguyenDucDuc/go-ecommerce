@@ -56,3 +56,28 @@ func (handler *ProductHandler) Create(c *gin.Context) {
 
 	util.NewResponseData(c, http.StatusOK, util.Success, "Create product successfully", rsp)
 }
+
+func (handler *ProductHandler) GetList(c *gin.Context) {
+	var query dto.GetListProductDto
+	if err := c.ShouldBindQuery(&query); err != nil {
+		util.NewResponseError(c, err)
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	queryGrpc := &product.GetListProductDto{
+		Page: query.Page,
+		Limit: query.Limit,
+		OrderBy: string(query.OrderBy),
+		Sort: string(query.Sort),
+	}
+
+	res, err := handler.client.GetListProduct(ctx, queryGrpc)
+	if err != nil {
+		util.NewResponseError(c, err)
+		return
+	}
+
+	util.NewResponseData(c, http.StatusOK, "Get list product successfully", util.Success, dto.MapToListProductResponse(res))
+}

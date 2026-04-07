@@ -43,6 +43,24 @@ type ResponseError struct {
 	Message    string `json:"message"`
 }
 
+type PaginateOptions struct {
+	Page int `json:"page"`
+	Limit int `json:"limit"`
+	Total int `json:"total"`
+	HasNext bool `json:"has_next"`
+	HasPrev bool `json:"has_prev"`
+}
+
+func NewPaginateOptions(total int, page, limit int) *PaginateOptions {
+	return &PaginateOptions{
+		Total: total,
+		Page: page,
+		Limit: limit,
+		HasNext: page *limit < total,
+		HasPrev: page > 1,
+	}
+}
+
 func (e *AppError) Error() string {
 	return e.Message
 }

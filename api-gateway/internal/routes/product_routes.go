@@ -20,5 +20,6 @@ func (productRoutes *ProductRoutes) RegisterRoutes(r *gin.RouterGroup) {
 	products := r.Group("/products")
 	{
 		products.POST("", productRoutes.handler.Create)
+		products.GET("", productRoutes.handler.GetList)
 	}
 }

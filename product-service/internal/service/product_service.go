@@ -88,3 +88,42 @@ func (productService *ProductService) CreateProduct(ctx context.Context, input *
 
 	return rsp, nil
 }
+
+func (productService *ProductService) GetListProduct(ctx context.Context, input *product.GetListProductDto) (*product.ListProductResponse, error) {
+	if input.Page <= 0 {
+        input.Page = 1
+    }
+    if input.Limit <= 0 || input.Limit > 100 { // Giới hạn tối đa để tránh kéo quá nhiều data
+        input.Limit = 10
+    }
+	skip := (input.Page - 1) * input.Limit
+	items, total ,err := productService.repo.FindAll(ctx, int(skip), int(input.Limit), input.OrderBy, input.Sort)
+	if err != nil {
+		return &product.ListProductResponse{}, err
+	}
+
+	prodRsp := make([]*product.ProductResponse, len(items))
+	for i := range items {
+		r := &product.ProductResponse{
+			Id: items[i].ID.Hex(),
+			Name: items[i].Name,
+			Price: items[i].Price.String(),
+			Attributes: util.MapToProtoStruct(items[i].Attributes),
+			Images: items[i].Images,
+			CreatedAt:  timestamppb.New(items[i].CreatedAt),
+			UpdatedAt:  timestamppb.New(items[i].UpdatedAt),
+		}
+		prodRsp[i] = r
+	}
+
+	rsp := &product.ListProductResponse{
+		Items: prodRsp,
+		Total: int64(total),
+		Page: input.Page,
+		Limit: input.Limit,
+		HastNext: input.Page * input.Limit < int64(total),
+		HasPrev: input.Page > 1,
+	}
+
+	return rsp, nil
+}

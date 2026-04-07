@@ -1,6 +1,8 @@
 package util
 
 import (
+	"encoding/json"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -21,11 +23,28 @@ func DecimalToString(d bson.Decimal128) string {
 }
 
 
-func MapToProtoStruct(m bson.M) *structpb.Struct {
-	s, err := structpb.NewStruct(m)
+func MapToProtoStruct(input interface{}) *structpb.Struct {
+	if input == nil {
+		return nil
+	}
+
+	// 1. Dùng bson.MarshalExtJSON để convert sang JSON bytes
+	// Hàm này sẽ xử lý được cả bson.D, bson.M và các kiểu primitive (ObjectID, Decimal128)
+	data, err := bson.MarshalExtJSON(input, false, false)
 	if err != nil {
-		// Nếu lỗi, trả về một struct rỗng thay vì nil để tránh panic
-		s, _ = structpb.NewStruct(map[string]interface{}{})
+		return nil
+	}
+
+	// 2. Unmarshal vào map[string]interface{} chuẩn của Go
+	var cleanMap map[string]interface{}
+	if err := json.Unmarshal(data, &cleanMap); err != nil {
+		return nil
+	}
+
+	// 3. Tạo structpb. Struct này giờ đã nhận "cleanMap" là kiểu chuẩn
+	s, err := structpb.NewStruct(cleanMap)
+	if err != nil {
+		return nil
 	}
 	return s
 }

@@ -7,6 +7,7 @@ import (
 
 type IProductRepository interface {
 	Create(ctx context.Context, product *model.Product) (*model.Product, error)
+	FindAll(ctx context.Context, skip, limit int, orderBy, sort string)([]*model.Product, int, error)
 }
 
 type IInventoryRepository interface {
