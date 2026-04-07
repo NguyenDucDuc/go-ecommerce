@@ -4,6 +4,7 @@ import (
 	product "go-ecommerce/common/gen-proto/products"
 	"time"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -15,12 +16,19 @@ type CreateProductDto struct {
 	Quantity int64 `json:"quantity"`
 }
 
+type InventoryResponse struct {
+	ID bson.ObjectID `json:"_id"`
+	AvailableStock int64 `json:"available_stock"`
+	ReservedStock int64 `json:"reserved_stock"`
+}
+
 type ProductResponse struct {
-	ID string `json:"_id"`
+	ID bson.ObjectID `json:"_id"`
 	Name string `json:"name"`
 	Price string `json:"price"`
 	Attributes *structpb.Struct `json:"attributes"`
 	Images []string `json:"images"`
+	InventoryInfo InventoryResponse `json:"inventory_info"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
@@ -56,16 +64,32 @@ func MapToListProductResponse(responseGRPC *product.ListProductResponse) *GetLis
 	itemsGrpc := responseGRPC.Items
 	prodRsp := make([]*ProductResponse, len(itemsGrpc))
 	for i := range itemsGrpc {
+		id, _ := bson.ObjectIDFromHex(itemsGrpc[i].Id)
+		idInventory, _ := bson.ObjectIDFromHex(itemsGrpc[i].InventoryInfo.Id)
 		r := &ProductResponse{
-			ID: itemsGrpc[i].Id,
+			ID: id,
 			Name: itemsGrpc[i].Name,
 			Price: itemsGrpc[i].Price,
 			Attributes: itemsGrpc[i].Attributes,
 			Images: itemsGrpc[i].Images,
+			InventoryInfo: InventoryResponse{
+				ID: idInventory,
+				AvailableStock: itemsGrpc[i].InventoryInfo.AvailableStock,
+				ReservedStock: itemsGrpc[i].InventoryInfo.ReservedStock,
+			},
 			CreatedAt: itemsGrpc[i].CreatedAt.AsTime().Format(time.RFC3339),
 			UpdatedAt: itemsGrpc[i].UpdatedAt.AsTime().Format(time.RFC3339),
 		}
 		prodRsp[i] = r
+	}
+
+	hasNext := responseGRPC.HasNext
+	if !hasNext {
+		hasNext = false
+	}
+	hashPrev := responseGRPC.HasPrev
+	if !hashPrev {
+		hashPrev = false
 	}
 
 	return &GetListProductResponse{
@@ -73,7 +97,7 @@ func MapToListProductResponse(responseGRPC *product.ListProductResponse) *GetLis
 		Total: int(responseGRPC.Total),
 		Page: int(responseGRPC.Page),
 		Limit: int(responseGRPC.Limit),
-		HasNext: responseGRPC.HasPrev,
-		HasPrev: responseGRPC.HasPrev,
+		HasNext: hasNext,
+		HasPrev: hashPrev,
 	}
 }

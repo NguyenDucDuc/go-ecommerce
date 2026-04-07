@@ -17,6 +17,13 @@ service ProductService {
     rpc GetListProduct(GetListProductDto) returns (ListProductResponse);
 }
 
+// inventory
+message InventoryResponse {
+    string id = 1;
+    int64 available_stock = 2;
+    int64 reserved_stock = 3;
+}
+
 // product message
 message ProductResponse {
   string id = 1; // Convert từ hex string của ObjectID
@@ -25,8 +32,9 @@ message ProductResponse {
   google.protobuf.Struct attributes = 4;
   repeated string images = 5;
   bool is_active = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
+  InventoryResponse inventory_info = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
 }
 
 // create product dto
@@ -52,7 +60,7 @@ message ListProductResponse {
     int64 total = 2;
     int64 page = 3;
     int64 limit = 4;
-    bool hast_next = 5;
+    bool has_next = 5;
     bool has_prev = 6;
 }
 

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type ProductHandler struct {
@@ -42,10 +43,11 @@ func (handler *ProductHandler) Create(c *gin.Context) {
 	if err != nil {
 		util.NewResponseError(c, err)
 	}
-	util.PrettyPrint(res)
+
+	id, _ := bson.ObjectIDFromHex(res.Id)
 
 	rsp := dto.ProductResponse{
-		ID: res.Id,
+		ID: id,
 		Name: res.Name,
 		Price: res.Price,
 		Images: res.Images,
@@ -74,6 +76,7 @@ func (handler *ProductHandler) GetList(c *gin.Context) {
 	}
 
 	res, err := handler.client.GetListProduct(ctx, queryGrpc)
+	util.PrettyPrint(res)
 	if err != nil {
 		util.NewResponseError(c, err)
 		return

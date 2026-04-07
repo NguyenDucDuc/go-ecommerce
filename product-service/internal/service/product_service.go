@@ -109,6 +109,11 @@ func (productService *ProductService) GetListProduct(ctx context.Context, input 
 			Name: items[i].Name,
 			Price: items[i].Price.String(),
 			Attributes: util.MapToProtoStruct(items[i].Attributes),
+			InventoryInfo: &product.InventoryResponse{
+				Id: items[i].InventoryInfo.ID.Hex(),
+				AvailableStock: items[i].InventoryInfo.AvailableStock,
+				ReservedStock: items[i].InventoryInfo.ReservedStock,
+			},
 			Images: items[i].Images,
 			CreatedAt:  timestamppb.New(items[i].CreatedAt),
 			UpdatedAt:  timestamppb.New(items[i].UpdatedAt),
@@ -121,9 +126,8 @@ func (productService *ProductService) GetListProduct(ctx context.Context, input 
 		Total: int64(total),
 		Page: input.Page,
 		Limit: input.Limit,
-		HastNext: input.Page * input.Limit < int64(total),
-		HasPrev: input.Page > 1,
+		HasNext: int64(input.Page) * int64(input.Limit) < int64(total),
+		HasPrev: int64(input.Limit) > 1,
 	}
-
 	return rsp, nil
 }
