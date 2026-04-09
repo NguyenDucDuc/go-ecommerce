@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type OrderHandler struct {
@@ -55,5 +56,19 @@ func (orderHandler *OrderHandler) Create(c *gin.Context) {
 		return
 	}
 
-	util.NewResponseData(c, http.StatusOK, util.Success, "Create order successfully", res)
+	oId, _ := bson.ObjectIDFromHex(res.Id)
+	uId, _ := bson.ObjectIDFromHex(res.UserId)
+	rsp := &dto.OrderResponse{
+		Id: oId,
+		OrderCode: res.OrderCode,
+		UserId: uId,
+		TotalAmount: res.TotalAmount,
+		ShippingAddress: res.ShippingAddress,
+		Status: res.Status,
+		Items: dto.MapToItemResponse(res.Items),
+		CreatedAt: res.CreatedAt.AsTime().Format(time.RFC3339),
+		UpdatedAt: res.UpdatedAt.AsTime().Format(time.RFC3339),
+	}
+
+	util.NewResponseData(c, http.StatusOK, util.Success, "Create order successfully", rsp)
 }

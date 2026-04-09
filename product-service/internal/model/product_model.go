@@ -32,3 +32,8 @@ type ProductWithInventory struct {
 	CreatedAt  time.Time       `bson:"created_at" json:"created_at"`
 	UpdatedAt  time.Time       `bson:"updated_at" json:"updated_at"`
 }
+
+type OrderItem struct {
+	ProductId bson.ObjectID `json:"product_id"`
+	Quantity int32 `json:"quantity"`
+}

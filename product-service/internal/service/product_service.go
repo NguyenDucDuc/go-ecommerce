@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	product "go-ecommerce/common/gen-proto/products"
+	"go-ecommerce/common/pkg/rabbitmq"
 	pkg_redis "go-ecommerce/common/pkg/redis"
 	util "go-ecommerce/common/utils"
 	"go-ecommerce/product-service/internal/db"
@@ -22,16 +24,18 @@ type ProductService struct {
 	repo repository.IProductRepository
 	inventoryService *InventoryService
 	redisService pkg_redis.IRedisService
+	rabbitMQSerivce rabbitmq.IRabbitMQService
 	product.UnimplementedProductServiceServer
 }
 
 
-func NewProductService(tx db.TransactionManager, repo repository.IProductRepository, inventoryService *InventoryService, rdbService pkg_redis.IRedisService) *ProductService{
+func NewProductService(tx db.TransactionManager, repo repository.IProductRepository, inventoryService *InventoryService, rdbService pkg_redis.IRedisService, rabbitMQService rabbitmq.IRabbitMQService) *ProductService{
 	return &ProductService{
 		repo: repo,
 		inventoryService: inventoryService,
 		redisService: rdbService,
 		txManager: tx,
+		rabbitMQSerivce: rabbitMQService,
 	}
 }
 
@@ -172,4 +176,54 @@ func (productService *ProductService) FindById(ctx context.Context, input *produ
 		UpdatedAt: timestamppb.New(res.UpdatedAt),
 	}
 	return productRsp, nil
+}
+
+func (productService *ProductService) OrderCreated( body []byte) {
+    // 1. Giải mã message từ Queue
+    var msg struct {
+        OrderID string `json:"order_id"`
+        Items   []struct {
+            ProductID bson.ObjectID `json:"product_id"`
+            Quantity  int    `json:"quantity"`
+        } `json:"items"`
+    }
+
+    if err := json.Unmarshal(body, &msg); err != nil {
+        log.Printf("Lỗi giải mã message: %v", err)
+        return
+    }
+
+    // 2. Logic kiểm tra và trừ kho (Inventory Check)
+    // Giả sử bạn có hàm s.repo.UpdateStock xử lý việc này
+    success := true
+    reason := ""
+    
+	orderItems := make([]*model.OrderItem, len(msg.Items))
+	for i, item := range msg.Items {
+		orderItem := &model.OrderItem{
+			ProductId: item.ProductID,
+			Quantity: int32(item.Quantity),
+		}
+		orderItems[i] = orderItem
+	}
+    err := productService.inventoryService.ReserveStock(context.Background(), orderItems)
+    if err != nil {
+        success = false
+        reason = err.Error()
+    }
+
+    // 3. Bắn kết quả ngược lại cho Order Service
+    result := map[string]interface{}{
+        "order_id": msg.OrderID,
+        "success":  success,
+        "reason":   reason,
+    }
+
+    // Routing key sẽ khác nhau tùy vào kết quả
+    routingKey := "inventory.success"
+    if !success {
+        routingKey = "inventory.failed"
+    }
+
+    productService.rabbitMQSerivce.Publish("order_exchange", routingKey, result)
 }

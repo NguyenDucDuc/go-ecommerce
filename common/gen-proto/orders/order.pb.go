@@ -150,7 +150,7 @@ type Order struct {
 	OrderCode       string                 `protobuf:"bytes,2,opt,name=order_code,json=orderCode,proto3" json:"order_code,omitempty"`
 	UserId          string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	TotalAmount     string                 `protobuf:"bytes,4,opt,name=total_amount,json=totalAmount,proto3" json:"total_amount,omitempty"`
-	Status          OrderStatus            `protobuf:"varint,5,opt,name=status,proto3,enum=order.OrderStatus" json:"status,omitempty"`
+	Status          string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	ShippingAddress string                 `protobuf:"bytes,6,opt,name=shipping_address,json=shippingAddress,proto3" json:"shipping_address,omitempty"`
 	Items           []*OrderItem           `protobuf:"bytes,7,rep,name=items,proto3" json:"items,omitempty"`
 	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -217,11 +217,11 @@ func (x *Order) GetTotalAmount() string {
 	return ""
 }
 
-func (x *Order) GetStatus() OrderStatus {
+func (x *Order) GetStatus() string {
 	if x != nil {
 		return x.Status
 	}
-	return OrderStatus_PENDING
+	return ""
 }
 
 func (x *Order) GetShippingAddress() string {
@@ -375,14 +375,14 @@ const file_order_proto_rawDesc = "" +
 	"product_id\x18\x01 \x01(\tR\tproductId\x12!\n" +
 	"\fproduct_name\x18\x02 \x01(\tR\vproductName\x12\x14\n" +
 	"\x05price\x18\x03 \x01(\tR\x05price\x12\x1a\n" +
-	"\bquantity\x18\x04 \x01(\x05R\bquantity\"\xe7\x02\n" +
+	"\bquantity\x18\x04 \x01(\x05R\bquantity\"\xd3\x02\n" +
 	"\x05Order\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
 	"order_code\x18\x02 \x01(\tR\torderCode\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12!\n" +
-	"\ftotal_amount\x18\x04 \x01(\tR\vtotalAmount\x12*\n" +
-	"\x06status\x18\x05 \x01(\x0e2\x12.order.OrderStatusR\x06status\x12)\n" +
+	"\ftotal_amount\x18\x04 \x01(\tR\vtotalAmount\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12)\n" +
 	"\x10shipping_address\x18\x06 \x01(\tR\x0fshippingAddress\x12&\n" +
 	"\x05items\x18\a \x03(\v2\x10.order.OrderItemR\x05items\x129\n" +
 	"\n" +
@@ -428,18 +428,17 @@ var file_order_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil),  // 5: google.protobuf.Timestamp
 }
 var file_order_proto_depIdxs = []int32{
-	0, // 0: order.Order.status:type_name -> order.OrderStatus
-	1, // 1: order.Order.items:type_name -> order.OrderItem
-	5, // 2: order.Order.created_at:type_name -> google.protobuf.Timestamp
-	5, // 3: order.Order.updated_at:type_name -> google.protobuf.Timestamp
-	4, // 4: order.CreateOrderDto.items:type_name -> order.CreateOrderDto.ItemDto
-	3, // 5: order.OrderService.CreateOrder:input_type -> order.CreateOrderDto
-	2, // 6: order.OrderService.CreateOrder:output_type -> order.Order
-	6, // [6:7] is the sub-list for method output_type
-	5, // [5:6] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	1, // 0: order.Order.items:type_name -> order.OrderItem
+	5, // 1: order.Order.created_at:type_name -> google.protobuf.Timestamp
+	5, // 2: order.Order.updated_at:type_name -> google.protobuf.Timestamp
+	4, // 3: order.CreateOrderDto.items:type_name -> order.CreateOrderDto.ItemDto
+	3, // 4: order.OrderService.CreateOrder:input_type -> order.CreateOrderDto
+	2, // 5: order.OrderService.CreateOrder:output_type -> order.Order
+	5, // [5:6] is the sub-list for method output_type
+	4, // [4:5] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_order_proto_init() }

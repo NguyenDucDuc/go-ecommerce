@@ -4,6 +4,7 @@ import (
 	"fmt"
 	order "go-ecommerce/common/gen-proto/orders"
 	product "go-ecommerce/common/gen-proto/products"
+	"go-ecommerce/common/pkg/rabbitmq"
 	pkg_redis "go-ecommerce/common/pkg/redis"
 	util "go-ecommerce/common/utils"
 	order_config "go-ecommerce/order-service/internal/config"
@@ -36,9 +37,36 @@ func main() {
 	// redisdb
 	rdb := pkg_order_redis.ConnectRedis(cfg.RedisConfig)
 	redisService := pkg_redis.NewRedisService(rdb)
+	// rabbit mq
+	rabbitService, err := rabbitmq.NewRabbitMQ(cfg.RabbitMQConfig.Uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rabbitService.Close()
 
 	// load module
-	orderModule := module.NewOrderModule(db, redisService, productClient)
+	orderModule := module.NewOrderModule(db, redisService, productClient, rabbitService)
+
+	// rabbit mq worker
+	go func() {
+        log.Println("[*] Order Service đang đợi phản hồi từ Inventory...")
+        
+        // Nghe khi trừ kho thành công
+        go rabbitService.Consume(
+            "order_inventory_success_queue", 
+            "inventory.success", 
+            "order_exchange", 
+            orderModule.Service.HandleInventorySuccess, // Hàm này bạn viết trong service
+        )
+
+        // Nghe khi trừ kho thất bại
+        go rabbitService.Consume(
+            "order_inventory_failed_queue", 
+            "inventory.failed", 
+            "order_exchange", 
+            orderModule.Service.HandleInventoryFailed, // Hàm này bạn viết trong service
+        )
+    }()
 
 	// gRPC server
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", strconv.Itoa(cfg.GrpcConfig.GrpcPort)))
@@ -51,7 +79,7 @@ func main() {
 
 	reflection.Register(grpcServer)
 
-	log.Println("🚀 Product gRPC Service đang chạy tại port :50003")
+	log.Println("🚀 Order gRPC Service đang chạy tại port :50003")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("❌ Lỗi khởi chạy gRPC Server: %v", err)
 	}

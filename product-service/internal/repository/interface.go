@@ -15,4 +15,6 @@ type IProductRepository interface {
 
 type IInventoryRepository interface {
 	Create(ctx context.Context, inventory *model.Inventory) (*model.Inventory, error)
+	UpdateOne(ctx context.Context, id string, updateData bson.M) error
+	UpdateStock(ctx context.Context, productId string, quantity int) error
 }

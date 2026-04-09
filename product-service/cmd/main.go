@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	product "go-ecommerce/common/gen-proto/products"
+	"go-ecommerce/common/pkg/rabbitmq"
 	pkg_redis "go-ecommerce/common/pkg/redis"
 	util "go-ecommerce/common/utils"
 	product_config "go-ecommerce/product-service/internal/config"
@@ -27,8 +28,26 @@ func main() {
 	rdb := pkg_product_redis.ConnectRedis(cfg.RedisConfig)
 	redisService := pkg_redis.NewRedisService(rdb)
 
+	// rabbit mq
+	rabbitMQService, err := rabbitmq.NewRabbitMQ(cfg.RabbitMQConfig.Uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// load module
-	productModule := module.NewProductModule(db, redisService)
+	productModule := module.NewProductModule(db, redisService, rabbitMQService)
+
+
+	go func() {
+        log.Println("[*] RabbitMQ Worker đang lắng nghe queue: product_inventory_queue")
+        
+        rabbitMQService.Consume(
+            "product_inventory_queue",
+            "order.created",
+            "order_exchange",
+            productModule.Service.OrderCreated,
+        )
+    }()
 
 	// gRPC setup
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", strconv.Itoa(cfg.GrpcPort)))

@@ -16,10 +16,15 @@ type GrpcConfig struct {
 	GrpcProductUri string
 }
 
+type RabbitMQConfig struct {
+	Uri string
+}
+
 type ProductServiceConfig struct {
 	DatabaseConfig *DatabaseConfig
-	RedisConfig RedisConfig
-	GrpcConfig GrpcConfig
+	RedisConfig *RedisConfig
+	GrpcConfig *GrpcConfig
+	RabbitMQConfig *RabbitMQConfig
 }
 
 
@@ -34,17 +39,23 @@ func NewProductServiceConfig() *ProductServiceConfig {
 
 	// redis
 	redisUri := util.GetEnv("REDIS_URI", "localhost:6379")
+
+	// rabbitmq
+	rabbitUri := util.GetEnv("RABBIT_MQ_URI", "amqp://root:admin123@localhost:5672/")
 	return &ProductServiceConfig{
 		DatabaseConfig: &DatabaseConfig{
 			MongoUri: mongoUri,
 			MongoDBName: mongoDBName,
 		},
-		GrpcConfig: GrpcConfig{
+		GrpcConfig: &GrpcConfig{
 			GrpcPort: grpcPort,
 			GrpcProductUri: grpcProductUri,
 		},
-		RedisConfig: RedisConfig{
+		RedisConfig: &RedisConfig{
 			RedisUri: redisUri,
+		},
+		RabbitMQConfig: &RabbitMQConfig{
+			Uri: rabbitUri,
 		},
 	}
 }

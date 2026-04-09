@@ -1,7 +1,6 @@
 package model
 
 import (
-	order "go-ecommerce/common/gen-proto/orders"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -28,7 +27,7 @@ type Order struct {
 	OrderCode       string             `bson:"order_code" json:"order_code"`
 	UserID          bson.ObjectID      `bson:"user_id" json:"user_id"`
 	TotalAmount     bson.Decimal128            `bson:"total_amount" json:"total_amount"` // Decimal trong Mongo ánh xạ tốt với float64 hoặc decimal128
-	Status          order.OrderStatus        `bson:"status" json:"status"`
+	Status          string        `bson:"status" json:"status"`
 	Items     		[]OrderItem        `bson:"order_items" json:"order_items"` // Dùng interface{} hoặc struct riêng cho Object
 	ShippingAddress string             `bson:"shipping_address" json:"shipping_address"`
 	CreatedAt       time.Time          `bson:"created_at" json:"created_at"`

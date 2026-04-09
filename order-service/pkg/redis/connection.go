@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 var ctx = context.Background()
-func ConnectRedis(cfg order_config.RedisConfig) *redis.Client {
+func ConnectRedis(cfg *order_config.RedisConfig) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisUri, // Địa chỉ Redis server
 		Password: "",               // Mật khẩu (để trống nếu không có)

@@ -33,7 +33,7 @@ message Order {
     string order_code = 2;
     string user_id = 3;
     string total_amount = 4;
-    OrderStatus status = 5;
+    string status = 5;
     string shipping_address = 6;
     repeated OrderItem items = 7; 
     google.protobuf.Timestamp created_at = 8;
