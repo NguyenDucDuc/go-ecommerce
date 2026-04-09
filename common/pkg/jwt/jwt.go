@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"errors"
-	"go-ecommerce/user-service/config"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,12 +21,12 @@ type JwtService struct {
 	jwtIssuer string
 }
 
-func NewJWTService(cfg *config.JwtConfig) IJwtService {
+func NewJWTService(jwtSecret string, jwtAccessExp int, jwtRefreshExp int, jwtIssuer string) IJwtService {
 	return &JwtService{
-		jwtSecret:  cfg.JwtSecret,
-		jwtAccessExp: cfg.JwtAccessExp,
-		jwtRefreshExp: cfg.JwtRefreshExp,
-		jwtIssuer: cfg.JwtIssuer,
+		jwtSecret:  jwtSecret,
+		jwtAccessExp: jwtAccessExp,
+		jwtRefreshExp: jwtRefreshExp,
+		jwtIssuer: jwtIssuer,
 	}
 }
 // 1. Generate Access Token (Thường sống ngắn: 15-60 phút)

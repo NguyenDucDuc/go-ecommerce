@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -55,4 +56,14 @@ func ProtoStructToMap(s *structpb.Struct) bson.M {
 		return bson.M{}
 	}
 	return bson.M(s.AsMap())
+}
+
+func Float64ToDecimal128(f float64) bson.Decimal128 {
+	// 'f' nghĩa là định dạng số thập phân thông thường
+	// '2' là số chữ số sau dấu phẩy (bạn có thể tăng lên nếu cần độ chính xác cao hơn)
+	// 64 là kích thước kiểu float64
+	s := strconv.FormatFloat(f, 'f', 2, 64)
+	
+	d, _ := bson.ParseDecimal128(s)
+	return d
 }

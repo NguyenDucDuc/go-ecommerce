@@ -424,6 +424,51 @@ func (x *ListProductResponse) GetHasPrev() bool {
 	return false
 }
 
+// find by id
+type FindByIdDto struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProductId     string                 `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FindByIdDto) Reset() {
+	*x = FindByIdDto{}
+	mi := &file_product_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FindByIdDto) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FindByIdDto) ProtoMessage() {}
+
+func (x *FindByIdDto) ProtoReflect() protoreflect.Message {
+	mi := &file_product_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FindByIdDto.ProtoReflect.Descriptor instead.
+func (*FindByIdDto) Descriptor() ([]byte, []int) {
+	return file_product_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *FindByIdDto) GetProductId() string {
+	if x != nil {
+		return x.ProductId
+	}
+	return ""
+}
+
 var File_product_proto protoreflect.FileDescriptor
 
 const file_product_proto_rawDesc = "" +
@@ -466,10 +511,14 @@ const file_product_proto_rawDesc = "" +
 	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x14\n" +
 	"\x05limit\x18\x04 \x01(\x03R\x05limit\x12\x19\n" +
 	"\bhas_next\x18\x05 \x01(\bR\ahasNext\x12\x19\n" +
-	"\bhas_prev\x18\x06 \x01(\bR\ahasPrev2\xa2\x01\n" +
+	"\bhas_prev\x18\x06 \x01(\bR\ahasPrev\",\n" +
+	"\vFindByIdDto\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x01 \x01(\tR\tproductId2\xde\x01\n" +
 	"\x0eProductService\x12D\n" +
 	"\rCreateProduct\x12\x19.product.CreateProductDto\x1a\x18.product.ProductResponse\x12J\n" +
-	"\x0eGetListProduct\x12\x1a.product.GetListProductDto\x1a\x1c.product.ListProductResponseB\x11Z\x0f./proto/productb\x06proto3"
+	"\x0eGetListProduct\x12\x1a.product.GetListProductDto\x1a\x1c.product.ListProductResponse\x12:\n" +
+	"\bFindById\x12\x14.product.FindByIdDto\x1a\x18.product.ProductResponseB\x11Z\x0f./proto/productb\x06proto3"
 
 var (
 	file_product_proto_rawDescOnce sync.Once
@@ -483,29 +532,32 @@ func file_product_proto_rawDescGZIP() []byte {
 	return file_product_proto_rawDescData
 }
 
-var file_product_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_product_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_product_proto_goTypes = []any{
 	(*InventoryResponse)(nil),     // 0: product.InventoryResponse
 	(*ProductResponse)(nil),       // 1: product.ProductResponse
 	(*CreateProductDto)(nil),      // 2: product.CreateProductDto
 	(*GetListProductDto)(nil),     // 3: product.GetListProductDto
 	(*ListProductResponse)(nil),   // 4: product.ListProductResponse
-	(*structpb.Struct)(nil),       // 5: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*FindByIdDto)(nil),           // 5: product.FindByIdDto
+	(*structpb.Struct)(nil),       // 6: google.protobuf.Struct
+	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
 var file_product_proto_depIdxs = []int32{
-	5, // 0: product.ProductResponse.attributes:type_name -> google.protobuf.Struct
+	6, // 0: product.ProductResponse.attributes:type_name -> google.protobuf.Struct
 	0, // 1: product.ProductResponse.inventory_info:type_name -> product.InventoryResponse
-	6, // 2: product.ProductResponse.created_at:type_name -> google.protobuf.Timestamp
-	6, // 3: product.ProductResponse.updated_at:type_name -> google.protobuf.Timestamp
-	5, // 4: product.CreateProductDto.attributes:type_name -> google.protobuf.Struct
+	7, // 2: product.ProductResponse.created_at:type_name -> google.protobuf.Timestamp
+	7, // 3: product.ProductResponse.updated_at:type_name -> google.protobuf.Timestamp
+	6, // 4: product.CreateProductDto.attributes:type_name -> google.protobuf.Struct
 	1, // 5: product.ListProductResponse.items:type_name -> product.ProductResponse
 	2, // 6: product.ProductService.CreateProduct:input_type -> product.CreateProductDto
 	3, // 7: product.ProductService.GetListProduct:input_type -> product.GetListProductDto
-	1, // 8: product.ProductService.CreateProduct:output_type -> product.ProductResponse
-	4, // 9: product.ProductService.GetListProduct:output_type -> product.ListProductResponse
-	8, // [8:10] is the sub-list for method output_type
-	6, // [6:8] is the sub-list for method input_type
+	5, // 8: product.ProductService.FindById:input_type -> product.FindByIdDto
+	1, // 9: product.ProductService.CreateProduct:output_type -> product.ProductResponse
+	4, // 10: product.ProductService.GetListProduct:output_type -> product.ListProductResponse
+	1, // 11: product.ProductService.FindById:output_type -> product.ProductResponse
+	9, // [9:12] is the sub-list for method output_type
+	6, // [6:9] is the sub-list for method input_type
 	6, // [6:6] is the sub-list for extension type_name
 	6, // [6:6] is the sub-list for extension extendee
 	0, // [0:6] is the sub-list for field type_name
@@ -522,7 +574,7 @@ func file_product_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_product_proto_rawDesc), len(file_product_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

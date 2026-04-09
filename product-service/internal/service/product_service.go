@@ -10,8 +10,10 @@ import (
 	"go-ecommerce/product-service/internal/model"
 	"go-ecommerce/product-service/internal/repository"
 	"log"
+	"net/http"
 	"time"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -152,4 +154,22 @@ func (productService *ProductService) GetListProduct(ctx context.Context, input 
 	// cache redis
 	productService.redisService.SetJSON(ctx, cacheKey, rsp, 10 * time.Minute)
 	return rsp, nil
+}
+
+func (productService *ProductService) FindById(ctx context.Context, input *product.FindByIdDto) (*product.ProductResponse, error) {
+	pId, err := bson.ObjectIDFromHex(input.ProductId)
+	if err != nil {
+		return &product.ProductResponse{}, util.NewAppError(http.StatusBadRequest, util.ErrBadRequest, "Invalid product_id")
+	}
+	res := productService.repo.FindById(ctx, pId)
+	productRsp := &product.ProductResponse{
+		Id: res.ID.Hex(),
+		Name: res.Name,
+		Attributes: util.MapToProtoStruct(res.Attributes),
+		Images: res.Images,
+		Price: res.Price.String(),
+		CreatedAt: timestamppb.New(res.CreatedAt),
+		UpdatedAt: timestamppb.New(res.UpdatedAt),
+	}
+	return productRsp, nil
 }

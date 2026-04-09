@@ -24,7 +24,7 @@ func main() {
 	db := db.ConnectDB(cfg.DatabaseConfig.MongoUri, cfg.DatabaseConfig.MongoDBName)
 
 	// init jwt
-	jwtService := jwt.NewJWTService(cfg.JwtConfig)
+	jwtService := jwt.NewJWTService(cfg.JwtConfig.JwtSecret, cfg.JwtConfig.JwtAccessExp, cfg.JwtConfig.JwtRefreshExp, cfg.JwtConfig.JwtIssuer)
 	// load module
 	userModule := module.NewUserModule(db)
 	authModule := module.NewAuthModule(db, jwtService)

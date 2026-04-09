@@ -5,8 +5,10 @@ import (
 	"go-ecommerce/api-gateway/internal/config"
 	"go-ecommerce/api-gateway/internal/module"
 	"go-ecommerce/common/gen-proto/auth"
+	order "go-ecommerce/common/gen-proto/orders"
 	product "go-ecommerce/common/gen-proto/products"
 	user "go-ecommerce/common/gen-proto/users"
+	"go-ecommerce/common/pkg/jwt"
 	util "go-ecommerce/common/utils"
 	"log"
 	"strconv"
@@ -33,6 +35,15 @@ func main() {
 	}
 	defer productConn.Close()
 
+	orderConn, err := grpc.NewClient(cfg.GrpcOrderServiceUri, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("❌ Không thể kết nối tới Order Service: %v", err)
+	}
+	defer orderConn.Close()
+
+	// jwt
+	jwtService := jwt.NewJWTService(cfg.JwtConfig.JwtSecret, cfg.JwtConfig.JwtAccessExp, cfg.JwtConfig.JwtRefreshExp, cfg.JwtConfig.JwtIssuer)
+
 	r := gin.Default()
 	v1 := r.Group("/api/v1")
 
@@ -40,6 +51,7 @@ func main() {
 	userClient := user.NewUserServiceClient(userConn)
 	authClient := auth.NewAuthServiceClient(userConn)
 	productClient := product.NewProductServiceClient(productConn)
+	orderClient := order.NewOrderServiceClient(orderConn)
 
 	userModule := module.NewUserModule(userClient)
 	userModule.Routes.RegisterRoutes(v1)
@@ -49,6 +61,9 @@ func main() {
 
 	productModule := module.NewProductModule(productClient)
 	productModule.Routes.RegisterRoutes(v1)
+
+	orderModule := module.NewOrderModule(orderClient, jwtService)
+	orderModule.Routes.RegisterRoutes(v1)
 
 	r.Run(fmt.Sprintf(":%s", strconv.Itoa(cfg.Port)))
 }

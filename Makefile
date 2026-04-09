@@ -15,3 +15,9 @@ gen-product:
 		--proto_path=proto "proto/product.proto" \
 		--go_out=common/gen-proto/products --go_opt=paths=source_relative \
   	--go-grpc_out=common/gen-proto/products --go-grpc_opt=paths=source_relative
+
+gen-order:
+	@protoc \
+		--proto_path=proto "proto/order.proto" \
+		--go_out=common/gen-proto/orders --go_opt=paths=source_relative \
+  	--go-grpc_out=common/gen-proto/orders --go-grpc_opt=paths=source_relative

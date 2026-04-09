@@ -99,3 +99,15 @@ func (productRepo *ProductRepository) FindAll(ctx context.Context, skip, limit i
 
 	return results[0].Data, results[0].Metadata[0].Total, nil
 }
+
+func (productRepo *ProductRepository) FindById(ctx context.Context, productId bson.ObjectID)(model.Product) {
+	var product model.Product
+
+	filter := bson.D{{Key: "_id", Value: productId}}
+	err := productRepo.collection.FindOne(ctx, filter).Decode(&product)
+	if err != nil {
+		return model.Product{}
+	} 
+
+	return product
+}

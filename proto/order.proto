@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package order;
+
+// Tùy chỉnh đường dẫn output cho Golang
+option go_package = "./proto/order";
+
+import "google/protobuf/timestamp.proto";
+
+// service
+service OrderService {
+    // create
+    rpc CreateOrder(CreateOrderDto) returns (Order);
+}
+
+enum OrderStatus {
+  PENDING = 0;
+  PAID = 1;
+  SHIPPING = 2;
+  CANCELLED = 3;
+}
+
+// order item
+message OrderItem {
+    string product_id = 1;
+    string product_name = 2;
+    string price = 3;
+    int32 quantity = 4;
+}
+// order response
+message Order {
+    string id = 1;
+    string order_code = 2;
+    string user_id = 3;
+    string total_amount = 4;
+    OrderStatus status = 5;
+    string shipping_address = 6;
+    repeated OrderItem items = 7; 
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+// create order dto
+message CreateOrderDto {
+    string user_id = 1;
+    message ItemDto {
+        string product_id = 1;
+        int32 quantity = 2;
+    }
+    repeated ItemDto items = 2;
+    string shipping_address = 3;
+}
