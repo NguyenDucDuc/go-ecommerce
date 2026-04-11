@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	user "go-ecommerce/common/gen-proto/users"
+	"go-ecommerce/common/pkg/rabbitmq"
 	util "go-ecommerce/common/utils"
 	"go-ecommerce/user-service/internal/model"
 	"go-ecommerce/user-service/internal/repository"
@@ -15,12 +16,14 @@ import (
 
 type UserService struct {
 	repo repository.IUserRepository
+	rabbitService rabbitmq.IRabbitMQService
 	user.UnimplementedUserServiceServer
 }
 
-func NewUserService(repo repository.IUserRepository) *UserService {
+func NewUserService(repo repository.IUserRepository, rabbitService rabbitmq.IRabbitMQService) *UserService {
 	return &UserService{
 		repo: repo,
+		rabbitService: rabbitService,
 	}
 }
 
@@ -56,6 +59,14 @@ func (userService *UserService) CreateUser(ctx context.Context, input *user.Crea
 		Roles: res.Roles,
 		CreatedAt: timestamppb.New(res.CreatedAt),
 	}
+
+	// send mail
+	otp, _ := util.GenerateOTP()
+	msg := map[string]interface{}{
+		"otp": otp,
+		"email" : userResponse.Email,
+	}
+	userService.rabbitService.Publish("topic_exchange","user.created",msg)
 
 	return userResponse, nil
 }

@@ -109,7 +109,7 @@ func (orderService *OrderService) CreateOrder(ctx context.Context, input *order.
 		"items": input.Items,
 	}
 
-	err = orderService.rabbitMQService.Publish("order_exchange", "order.created", msg)
+	err = orderService.rabbitMQService.Publish("topic_exchange", "order.created", msg)
 	if err != nil {
 		log.Printf("Failed to publish message: %v", err)
 	}

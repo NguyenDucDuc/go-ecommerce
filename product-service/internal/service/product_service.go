@@ -225,5 +225,5 @@ func (productService *ProductService) OrderCreated( body []byte) {
         routingKey = "inventory.failed"
     }
 
-    productService.rabbitMQSerivce.Publish("order_exchange", routingKey, result)
+    productService.rabbitMQSerivce.Publish("topic_exchange", routingKey, result)
 }

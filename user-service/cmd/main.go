@@ -5,6 +5,7 @@ import (
 	"go-ecommerce/common/gen-proto/auth"
 	user "go-ecommerce/common/gen-proto/users"
 	"go-ecommerce/common/pkg/jwt"
+	"go-ecommerce/common/pkg/rabbitmq"
 	util "go-ecommerce/common/utils"
 	"go-ecommerce/user-service/config"
 	"go-ecommerce/user-service/db"
@@ -23,10 +24,16 @@ func main() {
 	cfg := config.NewUserServiceConfig()
 	db := db.ConnectDB(cfg.DatabaseConfig.MongoUri, cfg.DatabaseConfig.MongoDBName)
 
+	// rabbit mq
+	rabbitMQService, err := rabbitmq.NewRabbitMQ(cfg.RabbitMQConfig.Uri)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// init jwt
 	jwtService := jwt.NewJWTService(cfg.JwtConfig.JwtSecret, cfg.JwtConfig.JwtAccessExp, cfg.JwtConfig.JwtRefreshExp, cfg.JwtConfig.JwtIssuer)
 	// load module
-	userModule := module.NewUserModule(db)
+	userModule := module.NewUserModule(db, rabbitMQService)
 	authModule := module.NewAuthModule(db, jwtService)
 
 	// gRPC setup
@@ -38,6 +45,8 @@ func main() {
 	grpcServer := grpc.NewServer()
 	user.RegisterUserServiceServer(grpcServer, userModule.Service)
 	auth.RegisterAuthServiceServer(grpcServer, authModule.AuthService)
+
+	
 
 	reflection.Register(grpcServer)
 

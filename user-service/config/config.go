@@ -14,10 +14,15 @@ type JwtConfig struct {
 	JwtIssuer     string
 }
 
+type RabbitMQConfig struct {
+	Uri string
+}	
+
 type UserServiceConfig struct {
 	DatabaseConfig *DatabaseConfig
 	JwtConfig      *JwtConfig
 	GrpcPort int
+	RabbitMQConfig *RabbitMQConfig
 }
 
 func NewUserServiceConfig() *UserServiceConfig {
@@ -31,6 +36,8 @@ func NewUserServiceConfig() *UserServiceConfig {
 	jwtRefreshExp := util.GetIntEnv("JWT_REFRESH_EXP", 120)
 	// grpc
 	grpcPort := util.GetIntEnv("GRPC_USER_SERVICE_PORT", 50001)
+	// rabbitmq
+	rabbitUri := util.GetEnv("RABBIT_MQ_URI", "amqp://root:admin123@localhost:5672/")
 	return &UserServiceConfig{
 		DatabaseConfig: &DatabaseConfig{
 			MongoUri: mongoUri,
@@ -43,5 +50,8 @@ func NewUserServiceConfig() *UserServiceConfig {
 			JwtRefreshExp: jwtRefreshExp,
 		},
 		GrpcPort: grpcPort,
+		RabbitMQConfig: &RabbitMQConfig{
+			Uri: rabbitUri,
+		},
 	}
 }

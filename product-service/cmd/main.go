@@ -10,6 +10,7 @@ import (
 	"go-ecommerce/product-service/internal/db"
 	"go-ecommerce/product-service/internal/module"
 	pkg_product_redis "go-ecommerce/product-service/internal/pkg/redis"
+	"go-ecommerce/product-service/internal/worker"
 	"log"
 	"net"
 	"strconv"
@@ -38,16 +39,9 @@ func main() {
 	productModule := module.NewProductModule(db, redisService, rabbitMQService)
 
 
-	go func() {
-        log.Println("[*] RabbitMQ Worker đang lắng nghe queue: product_inventory_queue")
-        
-        rabbitMQService.Consume(
-            "product_inventory_queue",
-            "order.created",
-            "order_exchange",
-            productModule.Service.OrderCreated,
-        )
-    }()
+	// rabbit mq worker
+	productWorker := worker.NewProductWorker(rabbitMQService, productModule.Service)
+	productWorker.Start()
 
 	// gRPC setup
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", strconv.Itoa(cfg.GrpcPort)))

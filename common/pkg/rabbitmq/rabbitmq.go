@@ -28,7 +28,7 @@ func NewRabbitMQ(url string) (IRabbitMQService, error) {
 
 	// Khai báo Exchange chung cho hệ thống (ví dụ: Topic Exchange)
 	err = ch.ExchangeDeclare(
-		"order_exchange", // name
+		"topic_exchange", // name
 		"topic",          // type
 		true,             // durable
 		false,            // auto-deleted

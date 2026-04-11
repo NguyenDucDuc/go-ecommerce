@@ -10,6 +10,7 @@ import (
 	order_config "go-ecommerce/order-service/internal/config"
 	"go-ecommerce/order-service/internal/db"
 	"go-ecommerce/order-service/internal/module"
+	"go-ecommerce/order-service/internal/worker"
 	pkg_order_redis "go-ecommerce/order-service/pkg/redis"
 	"log"
 	"net"
@@ -48,25 +49,8 @@ func main() {
 	orderModule := module.NewOrderModule(db, redisService, productClient, rabbitService)
 
 	// rabbit mq worker
-	go func() {
-        log.Println("[*] Order Service đang đợi phản hồi từ Inventory...")
-        
-        // Nghe khi trừ kho thành công
-        go rabbitService.Consume(
-            "order_inventory_success_queue", 
-            "inventory.success", 
-            "order_exchange", 
-            orderModule.Service.HandleInventorySuccess, // Hàm này bạn viết trong service
-        )
-
-        // Nghe khi trừ kho thất bại
-        go rabbitService.Consume(
-            "order_inventory_failed_queue", 
-            "inventory.failed", 
-            "order_exchange", 
-            orderModule.Service.HandleInventoryFailed, // Hàm này bạn viết trong service
-        )
-    }()
+	appWorker := worker.NewWorker(rabbitService, orderModule.Service)
+	appWorker.Start()
 
 	// gRPC server
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", strconv.Itoa(cfg.GrpcConfig.GrpcPort)))
