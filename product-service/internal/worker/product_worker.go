@@ -28,7 +28,4 @@ func (w *ProductWorker) Start() {
 		"topic_exchange",
 		w.productService.OrderCreated, // Đây là hàm xử lý logic trừ kho
 	)
-
-	// Nếu sau này có thêm event hoàn kho (khi thanh toán thất bại)
-	// go w.rabbitService.Consume("product_rollback_queue", "order.cancelled", ...)
 }
