@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-ecommerce/common/pkg/rabbitmq"
-	util "go-ecommerce/common/utils"
 	"go-ecommerce/notification-service/internal/service"
 	"log"
 )
@@ -62,8 +61,6 @@ func (w *NotificationWorker) Start() {
 				</div>
 			</div>`, msg.Otp)
 			
-			util.PrettyPrint(msg)
-
         	err := w.mailTrapService.Send(msg.Email, "Xác thực tài khoản", htmlContent)
 			if err != nil {
 				log.Printf("Lỗi gửi mail: %v", err)

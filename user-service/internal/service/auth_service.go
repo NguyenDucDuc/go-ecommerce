@@ -6,55 +6,65 @@ import (
 	user "go-ecommerce/common/gen-proto/users"
 	"go-ecommerce/common/pkg/jwt"
 	util "go-ecommerce/common/utils"
-	"go-ecommerce/user-service/internal/repository"
 	"net/http"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type AuthService struct {
-	repo repository.IUserRepository
+	loginMethodService *LoginMethodService
+	userService *UserService
 	jwtService jwt.IJwtService
 	auth.UnimplementedAuthServiceServer
 }
 
-func NewAuthService(repo repository.IUserRepository, jwtService jwt.IJwtService) *AuthService {
+func NewAuthService(loginMethodService *LoginMethodService, userService *UserService, jwtService jwt.IJwtService) *AuthService {
 	return &AuthService{
-		repo: repo,
+		loginMethodService: loginMethodService,
+		userService: userService,
 		jwtService: jwtService,
 	}
 }
 
 func (authService *AuthService) Login(ctx context.Context, in *auth.LoginDto) (*auth.LoginResponse, error) {
-	userFound, err := authService.repo.FindByEmail(ctx, in.Email)
+	filter := bson.M{"email": in.Email}
+	loginMethod, err := authService.loginMethodService.FindOne(ctx, filter)
 	if err != nil {
 		return &auth.LoginResponse{}, err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(userFound.Password), []byte(in.Password))
+
+	if loginMethod.IsActive == false {
+		return &auth.LoginResponse{}, util.NewAppError(http.StatusForbidden, util.ErrForbidden, "Account is not active")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(loginMethod.Password), []byte(in.Password))
 	if err != nil {
 		return &auth.LoginResponse{}, util.NewAppError(http.StatusBadRequest, util.ErrBadRequest, "Email or password not valid")
 	}
 
-	accessToken, err := authService.jwtService.GenerateAccessToken(userFound.ID.Hex(), userFound.Email, userFound.Roles)
+	userFound, err := authService.userService.FindByEmail(ctx, &user.FindByEmailDto{Email: in.Email})
+
+	accessToken, err := authService.jwtService.GenerateAccessToken(userFound.Id, loginMethod.Email, userFound.Roles)
 	if err != nil {
 		return &auth.LoginResponse{}, util.NewAppError(http.StatusInternalServerError, util.ErrInternalServer, "Jwt error")
 	}
 
-	refreshToken, err := authService.jwtService.GenerateRefreshToken(userFound.ID.Hex())
+	refreshToken, err := authService.jwtService.GenerateRefreshToken(userFound.Id)
 	if err != nil {
 		return &auth.LoginResponse{}, util.NewAppError(http.StatusInternalServerError, util.ErrInternalServer, "Jwt error")
 	}
 
 	rsp := &auth.LoginResponse{
 		User: &user.UserResponse{
-			Id: userFound.ID.Hex(),
-			Email: userFound.Email,
-			Password: userFound.Password,
+			Id: userFound.Id,
+			Email: loginMethod.Email,
+			Password: loginMethod.Password,
 			FullName: userFound.FullName,
 			Address: userFound.Address,
 			Roles: userFound.Roles,
-			CreatedAt: timestamppb.New(userFound.CreatedAt),
+			CreatedAt: timestamppb.New(userFound.CreatedAt.AsTime()),
 		},
 		AccessToken: accessToken,
 		RefreshToken: refreshToken,

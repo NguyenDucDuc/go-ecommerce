@@ -39,13 +39,9 @@ func (handler *UserHandler) CreateUser(c *gin.Context){
 	}
 
 	id, _ := bson.ObjectIDFromHex(user.Id)
-	rsp := &dto.UserResponseDto{
-		ID:        id, // Chuyển ObjectID sang String
-		Email:     user.Email,
-		FullName:  user.FullName,
-		Roles:     user.Roles, // Giả sử Roles của bạn là []string
-		Address: user.Address,
-		CreatedAt: user.CreatedAt.AsTime().Format(time.RFC3339),
+	rsp := &dto.CreateUserResponse{
+		Id:        id, // Chuyển ObjectID sang String
+		Otp: user.Otp,
 	}
 
 	util.NewResponseData(c, http.StatusCreated, util.Success ,"Create user successfully", rsp)

@@ -33,8 +33,10 @@ func main() {
 	// init jwt
 	jwtService := jwt.NewJWTService(cfg.JwtConfig.JwtSecret, cfg.JwtConfig.JwtAccessExp, cfg.JwtConfig.JwtRefreshExp, cfg.JwtConfig.JwtIssuer)
 	// load module
-	userModule := module.NewUserModule(db, rabbitMQService)
-	authModule := module.NewAuthModule(db, jwtService)
+	loginMethodModule := module.NewLoginMethodModule(db)
+	userModule := module.NewUserModule(db, loginMethodModule.Service ,rabbitMQService)
+	authModule := module.NewAuthModule(loginMethodModule.Service, userModule.Service, jwtService)
+
 
 	// gRPC setup
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", strconv.Itoa(cfg.GrpcPort)))

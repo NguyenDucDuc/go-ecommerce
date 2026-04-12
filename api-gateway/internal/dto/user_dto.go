@@ -9,6 +9,11 @@ type CreateUserDto struct {
 	Address  string `json:"address"`
 }
 
+type CreateUserResponse struct {
+	Id bson.ObjectID `json:"_id"`
+	Otp string `json:"otp"`
+}
+
 type UserResponseDto struct {
 	ID bson.ObjectID `json:"_id"`
 	Email string `json:"email"`

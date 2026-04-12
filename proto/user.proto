@@ -10,7 +10,7 @@ import "google/protobuf/timestamp.proto";
 // Service định nghĩa các hành động mà User Service cung cấp
 service UserService {
   // create user
-  rpc CreateUser(CreateUserDto) returns (UserResponse);
+  rpc CreateUser(CreateUserDto) returns (CreateUserResponse);
   // find by email
   rpc FindByEmail(FindByEmailDto) returns (UserResponse);
 }
@@ -32,6 +32,11 @@ message CreateUserDto {
     string password = 2;
     string full_name = 3;
     string address = 4;
+}
+// create user response
+message CreateUserResponse {
+  string otp = 1;
+  string id = 2;
 }
 
 // find by email dto

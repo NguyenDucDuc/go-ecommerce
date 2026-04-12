@@ -8,8 +8,8 @@ import (
 
 type User struct {
 	ID        bson.ObjectID `bson:"_id,omitempty" json:"_id"`
-	Email     string        `bson:"email" json:"email"`
-	Password  string        `bson:"password" json:"password"` // Không trả password về client
+	// Email     string        `bson:"email" json:"email"`
+	// Password  string        `bson:"password" json:"password"` // Không trả password về client
 	FullName  string        `bson:"full_name" json:"full_name"`
 	Roles     []string      `bson:"roles" json:"roles"`
 	Address string     `bson:"address" json:"address"`

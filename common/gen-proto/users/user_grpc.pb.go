@@ -30,7 +30,7 @@ const (
 // Service định nghĩa các hành động mà User Service cung cấp
 type UserServiceClient interface {
 	// create user
-	CreateUser(ctx context.Context, in *CreateUserDto, opts ...grpc.CallOption) (*UserResponse, error)
+	CreateUser(ctx context.Context, in *CreateUserDto, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	// find by email
 	FindByEmail(ctx context.Context, in *FindByEmailDto, opts ...grpc.CallOption) (*UserResponse, error)
 }
@@ -43,9 +43,9 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserDto, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserDto, opts ...grpc.CallOption) (*CreateUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserResponse)
+	out := new(CreateUserResponse)
 	err := c.cc.Invoke(ctx, UserService_CreateUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (c *userServiceClient) FindByEmail(ctx context.Context, in *FindByEmailDto,
 // Service định nghĩa các hành động mà User Service cung cấp
 type UserServiceServer interface {
 	// create user
-	CreateUser(context.Context, *CreateUserDto) (*UserResponse, error)
+	CreateUser(context.Context, *CreateUserDto) (*CreateUserResponse, error)
 	// find by email
 	FindByEmail(context.Context, *FindByEmailDto) (*UserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
@@ -83,7 +83,7 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserDto) (*UserResponse, error) {
+func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserDto) (*CreateUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedUserServiceServer) FindByEmail(context.Context, *FindByEmailDto) (*UserResponse, error) {

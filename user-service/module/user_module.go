@@ -13,9 +13,9 @@ type UserModule struct {
 	Service *service.UserService
 }
 
-func NewUserModule(db *mongo.Database, rabbitService rabbitmq.IRabbitMQService) *UserModule{
+func NewUserModule(db *mongo.Database,loginMethodService *service.LoginMethodService,rabbitService rabbitmq.IRabbitMQService) *UserModule{
 	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo, rabbitService)
+	userService := service.NewUserService(userRepo, loginMethodService ,rabbitService)
 	return &UserModule{
 		Repo: userRepo,
 		Service: userService,
