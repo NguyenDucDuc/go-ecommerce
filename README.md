@@ -13,16 +13,16 @@ A high-performance E-commerce system built with **Golang**, utilizing a **Micros
 ## 🏗️ Project Structure
 ```text
 .
-├── cmd/                # Entry points for microservices
-├── internal/           # Domain logic, UseCases, Repositories
-│   ├── auth/           # Auth Service (JWT, OTP)
-│   ├── order/          # Order Service
-│   ├── product/        # Product Service
-│   └── platform/       # Shared utilities (Redis, MongoDB, gRPC)
-├── pkg/                # Public/Shared packages
-├── proto/              # Protocol Buffer definitions
-├── deploy/             # Infrastructure (Docker-Compose, K8s)
-└── .env.example        # Environment variables template
+├── api-gateway/            # API Gateway service
+├── common/                 # Shared utilities, models, and constants
+├── notification-service/   # Notification handling service
+├── order-service/          # Order processing and management
+├── product-service/        # Product catalog and inventory
+├── proto/                  # Protocol Buffer definitions
+├── user-service/           # Authentication and User management
+├── .env                    # Environment variables
+├── Makefile                # Build and run commands
+└── README.md               # Project documentation
 ```
 
 ### Run a Service (e.g., Auth Service):
