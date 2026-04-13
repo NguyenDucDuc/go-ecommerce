@@ -23,6 +23,7 @@ A high-performance E-commerce system built with **Golang**, utilizing a **Micros
 ├── proto/              # Protocol Buffer definitions
 ├── deploy/             # Infrastructure (Docker-Compose, K8s)
 └── .env.example        # Environment variables template
+```
 
 ### Run a Service (e.g., Auth Service):
-```go run cmd/auth/main.go
+```go run cmd/auth/main.go```
