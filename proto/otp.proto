@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package otp;
+
+// Tùy chỉnh đường dẫn output cho Golang
+option go_package = "./proto/otp";
+
+
+// Service định nghĩa các hành động mà User Service cung cấp
+service OtpService {
+    // validate create account service
+    rpc ValidateCreateAccount(ValidateCreateAccountDto) returns (ValidateResponse);
+}
+
+
+// validate otp create account
+message ValidateCreateAccountDto {
+    string email = 1;
+    string otp = 2;
+}
+
+// validate response
+message ValidateResponse {
+    bool is_valid = 1;
+}

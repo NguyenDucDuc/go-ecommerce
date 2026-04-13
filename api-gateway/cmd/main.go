@@ -6,6 +6,7 @@ import (
 	"go-ecommerce/api-gateway/internal/module"
 	"go-ecommerce/common/gen-proto/auth"
 	order "go-ecommerce/common/gen-proto/orders"
+	"go-ecommerce/common/gen-proto/otp"
 	product "go-ecommerce/common/gen-proto/products"
 	user "go-ecommerce/common/gen-proto/users"
 	"go-ecommerce/common/pkg/jwt"
@@ -52,6 +53,7 @@ func main() {
 	authClient := auth.NewAuthServiceClient(userConn)
 	productClient := product.NewProductServiceClient(productConn)
 	orderClient := order.NewOrderServiceClient(orderConn)
+	otpClient := otp.NewOtpServiceClient(userConn)
 
 	userModule := module.NewUserModule(userClient)
 	userModule.Routes.RegisterRoutes(v1)
@@ -64,6 +66,9 @@ func main() {
 
 	orderModule := module.NewOrderModule(orderClient, jwtService)
 	orderModule.Routes.RegisterRoutes(v1)
+
+	otpModule := module.NewOtpModule(otpClient)
+	otpModule.Routes.RegisterRoutes(v1)
 
 	r.Run(fmt.Sprintf(":%s", strconv.Itoa(cfg.Port)))
 }

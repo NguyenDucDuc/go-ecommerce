@@ -43,3 +43,14 @@ func (loginMethodRepo *LoginMethodRepository) FindOne(ctx context.Context, filte
 
 	return &loginMethod, nil
 }
+
+func (loginMethodRepo *LoginMethodRepository) UpdateOne(ctx context.Context, filter bson.M, update bson.M) error {
+    res, err := loginMethodRepo.collection.UpdateOne(ctx, filter, bson.M{"$set": update})
+    if err != nil {
+        return util.NewAppError(http.StatusInternalServerError, util.ErrInternalServer, "Failed to update login method")
+    }
+    if res.MatchedCount == 0 {
+        return nil 
+    }
+    return nil
+}

@@ -2,6 +2,7 @@ package module
 
 import (
 	"go-ecommerce/common/pkg/rabbitmq"
+	pkg_redis "go-ecommerce/common/pkg/redis"
 	"go-ecommerce/user-service/internal/repository"
 	"go-ecommerce/user-service/internal/service"
 
@@ -13,9 +14,9 @@ type UserModule struct {
 	Service *service.UserService
 }
 
-func NewUserModule(db *mongo.Database,loginMethodService *service.LoginMethodService,rabbitService rabbitmq.IRabbitMQService) *UserModule{
+func NewUserModule(db *mongo.Database,loginMethodService *service.LoginMethodService,rabbitService rabbitmq.IRabbitMQService, redisService pkg_redis.IRedisService) *UserModule{
 	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo, loginMethodService ,rabbitService)
+	userService := service.NewUserService(userRepo, loginMethodService ,rabbitService, redisService)
 	return &UserModule{
 		Repo: userRepo,
 		Service: userService,

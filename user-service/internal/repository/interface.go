@@ -15,6 +15,7 @@ type IUserRepository interface {
 type ILoginMethodRepository interface {
 	Create(ctx context.Context, body *model.LoginMethod) (*model.LoginMethod, error)
 	FindOne(ctx context.Context, filter bson.M) (*model.LoginMethod, error)
+	UpdateOne(ctx context.Context, filter bson.M, update bson.M) error
 }
 
 

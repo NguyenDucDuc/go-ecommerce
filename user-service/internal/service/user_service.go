@@ -4,10 +4,12 @@ import (
 	"context"
 	user "go-ecommerce/common/gen-proto/users"
 	"go-ecommerce/common/pkg/rabbitmq"
+	pkg_redis "go-ecommerce/common/pkg/redis"
 	util "go-ecommerce/common/utils"
 	"go-ecommerce/user-service/internal/model"
 	"go-ecommerce/user-service/internal/repository"
 	"net/http"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -18,22 +20,28 @@ type UserService struct {
 	repo repository.IUserRepository
 	loginMethodService *LoginMethodService
 	rabbitService rabbitmq.IRabbitMQService
+	redisService pkg_redis.IRedisService
 	user.UnimplementedUserServiceServer
 }
 
-func NewUserService(repo repository.IUserRepository, loginMethodService *LoginMethodService ,rabbitService rabbitmq.IRabbitMQService) *UserService {
+func NewUserService(repo repository.IUserRepository, loginMethodService *LoginMethodService ,rabbitService rabbitmq.IRabbitMQService, redisService pkg_redis.IRedisService) *UserService {
 	return &UserService{
 		repo: repo,
 		loginMethodService: loginMethodService,
 		rabbitService: rabbitService,
+		redisService: redisService,
 	}
 }
 
 func (userService *UserService) CreateUser(ctx context.Context, input *user.CreateUserDto) (*user.CreateUserResponse, error) {
 	// check email existed
-	existedUser, _ := userService.repo.FindByEmail(ctx, input.Email)
-	if existedUser.ID != bson.NilObjectID {
-		return &user.CreateUserResponse{}, util.NewAppError(http.StatusConflict, util.ErrConflict, "Email already exist")
+	loginMethodExisted, _ := userService.loginMethodService.FindOne(ctx, bson.M{"email": input.Email})
+	if loginMethodExisted.ID != bson.NilObjectID {
+		if loginMethodExisted.IsActive == true {
+			return &user.CreateUserResponse{}, util.NewAppError(http.StatusConflict, util.ErrConflict, "Email already exist")
+		} else {
+			return &user.CreateUserResponse{}, util.NewAppError(http.StatusConflict, util.ErrConflict, "Email already exist, please validate otp to active account")
+		}
 	}
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -79,6 +87,9 @@ func (userService *UserService) CreateUser(ctx context.Context, input *user.Crea
 		"email" : userResponse.Email,
 	}
 	userService.rabbitService.Publish("topic_exchange","user.created",msg)
+	// cache otp to redis
+	cacheKey := "otp:" + loginMethod.Email
+	userService.redisService.SetString(ctx, cacheKey, otp, 3*time.Minute)
 
 	rsp := &user.CreateUserResponse{
 		Id: userResponse.Id,

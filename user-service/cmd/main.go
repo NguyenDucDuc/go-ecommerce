@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"go-ecommerce/common/gen-proto/auth"
+	"go-ecommerce/common/gen-proto/otp"
 	user "go-ecommerce/common/gen-proto/users"
 	"go-ecommerce/common/pkg/jwt"
 	"go-ecommerce/common/pkg/rabbitmq"
+	pkg_redis "go-ecommerce/common/pkg/redis"
 	util "go-ecommerce/common/utils"
 	"go-ecommerce/user-service/config"
 	"go-ecommerce/user-service/db"
-	"go-ecommerce/user-service/module"
+	"go-ecommerce/user-service/internal/module"
+	pkg_user_redis "go-ecommerce/user-service/internal/pkg/redis"
 	"log"
 	"net"
 	"strconv"
@@ -29,13 +32,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// // redis db
+	rdb := pkg_user_redis.ConnectRedis(*cfg.RedisConfig)
+	redisService := pkg_redis.NewRedisService(rdb)
 
 	// init jwt
 	jwtService := jwt.NewJWTService(cfg.JwtConfig.JwtSecret, cfg.JwtConfig.JwtAccessExp, cfg.JwtConfig.JwtRefreshExp, cfg.JwtConfig.JwtIssuer)
 	// load module
 	loginMethodModule := module.NewLoginMethodModule(db)
-	userModule := module.NewUserModule(db, loginMethodModule.Service ,rabbitMQService)
+	userModule := module.NewUserModule(db, loginMethodModule.Service ,rabbitMQService, redisService)
 	authModule := module.NewAuthModule(loginMethodModule.Service, userModule.Service, jwtService)
+	otpModule := module.NewOtpModule(loginMethodModule.Service, userModule.Service, redisService)
 
 
 	// gRPC setup
@@ -47,7 +54,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	user.RegisterUserServiceServer(grpcServer, userModule.Service)
 	auth.RegisterAuthServiceServer(grpcServer, authModule.AuthService)
-
+	otp.RegisterOtpServiceServer(grpcServer, otpModule.Service)
 	
 
 	reflection.Register(grpcServer)

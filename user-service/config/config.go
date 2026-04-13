@@ -18,11 +18,16 @@ type RabbitMQConfig struct {
 	Uri string
 }	
 
+type RedisConfig struct {
+	Uri string
+}
+
 type UserServiceConfig struct {
 	DatabaseConfig *DatabaseConfig
 	JwtConfig      *JwtConfig
 	GrpcPort int
 	RabbitMQConfig *RabbitMQConfig
+	RedisConfig *RedisConfig
 }
 
 func NewUserServiceConfig() *UserServiceConfig {
@@ -38,6 +43,8 @@ func NewUserServiceConfig() *UserServiceConfig {
 	grpcPort := util.GetIntEnv("GRPC_USER_SERVICE_PORT", 50001)
 	// rabbitmq
 	rabbitUri := util.GetEnv("RABBIT_MQ_URI", "amqp://root:admin123@localhost:5672/")
+	// redis
+	redisUri := util.GetEnv("REDIS_URI", "localhost:6379")
 	return &UserServiceConfig{
 		DatabaseConfig: &DatabaseConfig{
 			MongoUri: mongoUri,
@@ -52,6 +59,9 @@ func NewUserServiceConfig() *UserServiceConfig {
 		GrpcPort: grpcPort,
 		RabbitMQConfig: &RabbitMQConfig{
 			Uri: rabbitUri,
+		},
+		RedisConfig: &RedisConfig{
+			Uri: redisUri,
 		},
 	}
 }

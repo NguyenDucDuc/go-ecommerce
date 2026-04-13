@@ -21,3 +21,9 @@ gen-order:
 		--proto_path=proto "proto/order.proto" \
 		--go_out=common/gen-proto/orders --go_opt=paths=source_relative \
   	--go-grpc_out=common/gen-proto/orders --go-grpc_opt=paths=source_relative
+
+gen-otp:
+	@protoc \
+		--proto_path=proto "proto/otp.proto" \
+		--go_out=common/gen-proto/otp --go_opt=paths=source_relative \
+  	--go-grpc_out=common/gen-proto/otp --go-grpc_opt=paths=source_relative

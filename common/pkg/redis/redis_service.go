@@ -36,6 +36,20 @@ func (r *RedisService) GetJSON(ctx context.Context, key string, dest interface{}
 	return json.Unmarshal(data, dest)
 }
 
+// SetString: Lưu một giá trị string đơn giản vào Redis
+func (r *RedisService) SetString(ctx context.Context, key string, value string, expiration time.Duration) error {
+	return r.client.Set(ctx, key, value, expiration).Err()
+}
+
+// GetString: Lấy giá trị string từ Redis
+func (r *RedisService) GetString(ctx context.Context, key string) (string, error) {
+	val, err := r.client.Get(ctx, key).Result()
+	if err != nil {
+		return "", err // Trả về lỗi (bao gồm cả redis.Nil nếu key không tồn tại)
+	}
+	return val, nil
+}
+
 func (r *RedisService) Delete(ctx context.Context, key string) error {
 	return r.client.Del(ctx, key).Err()
 }

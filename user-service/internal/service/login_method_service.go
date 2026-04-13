@@ -35,3 +35,11 @@ func (lmtService *LoginMethodService) FindOne(ctx context.Context, filter bson.M
 
 	return loginMethod, nil
 }
+
+func (lmtService *LoginMethodService) UpdateOne(ctx context.Context, filter bson.M, update bson.M) error {
+	err := lmtService.loginMethodRepo.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}

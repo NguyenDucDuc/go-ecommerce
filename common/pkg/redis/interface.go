@@ -9,4 +9,6 @@ type IRedisService interface {
 	SetJSON(ctx context.Context, key string, value interface{}, expiration time.Duration) error
 	GetJSON(ctx context.Context, key string, dest interface{}) error
 	Delete(ctx context.Context, key string) error
+	SetString(ctx context.Context, key string, value string, expiration time.Duration) error
+	GetString(ctx context.Context, key string) (string, error)
 }
